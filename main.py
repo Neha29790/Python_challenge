@@ -1,81 +1,68 @@
 import os
 import csv
-from operator import attrgetter
 
-
-class Candidate: 
-    def __init__(self, name, votePercentage=0, totalVotes=0): 
-        self.name = name 
-        self.votePercentage = votePercentage
-        self.totalVotes = totalVotes
-    def addTotalVotes(self, totalVotes='nil'):
-        if totalVotes != 'nil':
-            self.totalVotes = self.totalVotes + totalVotes
-    def calcVotePercentage(self, allVotes='nil'):
-        if allVotes != 'nil':
-            self.votePercentage = round((self.totalVotes/allVotes)*100,3)
-        
 
 
 os.chdir(os.path.dirname(__file__))
 
 print("This program is running from: " + os.getcwd())
 
-election_data_csv = os.path.join("..", "resources", "election_data.csv")
-    
-listOfCandidates = [] 
+budget_data_csv = os.path.join("..", "resources", "budget_data.csv")
 
-with open(election_data_csv) as csv_file:
+with open(budget_data_csv) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=",")
     csv_header = next(csv_file)
 
-    rowNum = 0
-
+    rowNum = -1
+    Total = 0
+    TotalChange = 0
+    previousProfitLoss = 0
+    greatestInc = 0
+    greatestIncLable = ""
+    greatestDec = 0
+    greatestDecLable = ""
 
     for row in csv_reader:
         rowNum = rowNum+1
-        candidate = next((person for person in listOfCandidates if person.name == row[2]),None,)
-        if candidate == None: 
-            candidate = Candidate(row[2])
-            candidate.addTotalVotes(1)
-            listOfCandidates.append(candidate)
-        else:
-            candidate.addTotalVotes(1)
+        change =(int(row[1])-previousProfitLoss)
+        Total = Total + int(row[1])
+        TotalChange=TotalChange + change
+        if rowNum ==0: TotalChange=0
+        previousProfitLoss = int(row[1])
+        if change > greatestInc:greatestInc=change;greatestIncLable=row[0]
+        if change < greatestDec:greatestDec=change;greatestDecLable=row[0]
 
-with open('Poll_Analysis.txt', 'w') as f:
     print("")
-    f.write('\n')
     print("---------------------------------------------------------------")
-    f.write("---------------------------------------------------------------")
     print("")
-    f.write('\n')
-    print("Election Results")
-    f.write("Election Results")
+    print("Financial Analysis")
     print("")
-    f.write('\n')
     print("---------------------------------------------------------------")
-    f.write("---------------------------------------------------------------")
     print("")
-    f.write('\n')
-    print("Total Votes: "+ str(rowNum))
-    f.write("Total Votes: "+ str(rowNum))
+    print("Total Months: "+ str(rowNum+1))
     print("")
-    f.write('\n')
-    if len(listOfCandidates) > 0:
-        for x in listOfCandidates:
-            x.calcVotePercentage(rowNum)
-            print(x.name + ": "+ str(x.votePercentage) + "% ("+ str(x.totalVotes) + ")")
-            f.write(x.name + ": "+ str(x.votePercentage) + "% ("+ str(x.totalVotes) + ")")
-            print("")
-            f.write('\n')
-        print("---------------------------------------------------------------")
-        f.write("---------------------------------------------------------------")
-        print("")
+    print("Total: $"+ str(Total))
+    print("")
+    print("Average Change: $"+ str(round((TotalChange/rowNum),2)))
+    print("")
+    print("Greatest Increase in Profits: "+ greatestIncLable + " ($" +str(greatestInc)+")")
+    print("")
+    print("Greatest Decrease in Profits: "+ greatestDecLable + " ($" +str(greatestDec)+")")
+
+    with open('Pybank_Analysis.txt', 'w') as f:
         f.write('\n')
-        winner = max(listOfCandidates, key=attrgetter('totalVotes'))
-        print("Winner: "+ winner.name )
-        f.write("Winner: "+ winner.name )
-        print("")
-        f.write('\n')
-        print("---------------------------------------------------------------")
         f.write("---------------------------------------------------------------")
+        f.write('\n')
+        f.write("Financial Analysis")
+        f.write('\n')
+        f.write("---------------------------------------------------------------")
+        f.write('\n')
+        f.write("Total Months: "+ str(rowNum+1))
+        f.write('\n')
+        f.write("Total: $"+ str(Total))
+        f.write('\n')
+        f.write("Average Change: $"+ str(round((TotalChange/rowNum),2)))
+        f.write('\n')
+        f.write("Greatest Increase in Profits: "+ greatestIncLable + " ($" +str(greatestInc)+")")
+        f.write('\n')
+        f.write("Greatest Decrease in Profits: "+ greatestDecLable + " ($" +str(greatestDec)+")")
